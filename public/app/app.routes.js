@@ -6,7 +6,9 @@ angular.module('app.routes', ['ngRoute', 'mainCtrl'])
 
 		// route for the home page
 		.when('/', {
-			templateUrl : 'app/views/pages/home.html'
+			templateUrl : 'app/views/pages/home.html',
+            controller  : 'requestController',
+            controllerAs: 'home'
 		})
 
 		 //login page
@@ -34,6 +36,13 @@ angular.module('app.routes', ['ngRoute', 'mainCtrl'])
 			templateUrl: 'app/views/pages/user.html',
 			controller: 'userController',
 			controllerAs: 'user'
+		})
+
+        //create new request
+		.when('/newRequest', {
+			templateUrl: 'app/views/pages/newRequest.html',
+			controller: 'requestCreateController',
+			controllerAs: 'request'
 		})
 
         .otherwise({
