@@ -3,6 +3,7 @@ var User       = require('../models/user'); // User model
 var Request    = require('../models/request'); // Request Model
 var Class      = require('../models/class'); //Class Model
 var jwt        = require('jsonwebtoken');
+var moment     = require('moment');
 var config     = require('../../config');
 
 // secret used when making tokens ;)
@@ -71,7 +72,6 @@ module.exports = function(app, express) {
 	apiRouter.use(function(req, res, next) {
 		// do logging
 		console.log('Somebody just came to our app!');
-
 	  // checking for a token
 	  var token = req.body.token || req.params.token || req.headers['x-access-token'];
 	  // decode token
@@ -209,7 +209,6 @@ module.exports = function(app, express) {
 			var request = new Request();		// create a new instance of the Request model
 			request.username = req.body.username;  // set what user is making the request
             request.wanted = req.body.wanted;  // set what class that the user wants
-            request.requestTime = req.body.requestTime;  // set what time the request occurred
             request.trading = req.body.trading;  // set what classes the user is trading
             request.offering = req.body.offering;  // set what the user is offering for the class
 
@@ -225,7 +224,7 @@ module.exports = function(app, express) {
         //gets all of the requests in the db (GET /requests)
         .get(function(req, res) {
             //gets all requests sorted by most recent
-			Request.find({}, null, {sort: {requestTime: -1}}, function(err, requests) {
+			Request.find({}, null, {sort: {date: -1}}, function(err, requests) {
 				if (err) res.send(err);
 				// return the requests
 				res.json(requests);
@@ -279,7 +278,6 @@ module.exports = function(app, express) {
 				// set the new user information if it exists in the request
 				if (req.body.username) request.username = req.body.username;
                 if (req.body.wanted) request.wanted = req.body.wanted;
-				if (req.body.requestTime) request.requestTime = req.body.requestTime;
 				if (req.body.trading) request.trading = req.body.trading;
                 if (req.body.offering) request.offering = req.body.offering;
 
