@@ -1,11 +1,13 @@
 var mongoose     = require('mongoose');
 var Schema       = mongoose.Schema;
 
-// user schema
+// request schema
 var RequestSchema   = new Schema({
-    user: {type: String, required: true},
-	wanted: {type: ClassSchema, required: true},
-	requestTime: {type: date, required: true},
-    trading: {type: [ClassSchema]},
+    username: {type: String, required: true},
+	wanted: {type: String, required: true},
+	requestTime: {type: Date, required: true},
+    trading: {type: [String]},
     offering: {type: [String]}
 });
+
+module.exports = mongoose.model('Request', RequestSchema);

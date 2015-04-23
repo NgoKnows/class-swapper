@@ -1,16 +1,21 @@
-var bodyParser = require('body-parser'); 	// get body-parser
-var User       = require('../models/user');
-var Request       = require('../models/request');
+var bodyParser = require('body-parser');
+var User       = require('../models/user'); // User model
+var Request    = require('../models/request'); // Request Model
+var Class      = require('../models/class'); //Class Model
 var jwt        = require('jsonwebtoken');
 var config     = require('../../config');
 
-// super secret for creating tokens
-var superSecret = config.secret;
+// secret used when making tokens ;)
+var secret = config.secret;
 
 module.exports = function(app, express) {
 	var apiRouter = express.Router();
 
 	// route to authenticate a user (POST http://localhost:8080/api/authenticate)
+    // used when logging in and seeing if username and password are OK
+    // --------------------------------------------
+	// LOGIN AUTHENTICATION
+	// --------------------------------------------
 	apiRouter.post('/authenticate', function(req, res) {
 
 	  // find the user
@@ -24,7 +29,7 @@ module.exports = function(app, express) {
 	    if (!user) {
 	      res.json({
 	      	success: false,
-	      	message: 'Authentication failed. User not found.'
+	      	message: 'This username does not exist!'
 	    	});
 	    } else if (user) {
 
@@ -33,45 +38,81 @@ module.exports = function(app, express) {
 	      if (!validPassword) {
 	        res.json({
 	        	success: false,
-	        	message: 'Authentication failed. Wrong password.'
+	        	message: "That's the wroooong password!"
 	      	});
 	      } else {
-
 	        // if user is found and password is right
 	        // create a token
 	        var token = jwt.sign({
-	        	name: user.name,
-	        	username: user.username
-	        }, superSecret, {
+	        	firstName: user.firstName,
+                lastName: user.lastName,
+	        	username: user.username,
+                major: user.major,
+                class: user.class,
+                id: user._id
+	        }, secret, {
 	          expiresInMinutes: 1440 // expires in 24 hours
 	        });
 
 	        // return the information including token as JSON
 	        res.json({
 	          success: true,
-	          message: 'Enjoy your token!',
+	          message: 'You get a Token!!',
 	          token: token
 	        });
 	      }
-
 	    }
-
 	  });
 	});
 
-	// test route to make sure everything is working
-	// accessed at GET http://localhost:8080/api
-	apiRouter.get('/', function(req, res) {
-		res.json({ message: 'hooray! welcome to our api!' });
+    // --------------------------------------------
+	// TOKEN VERIFICATION
+	// --------------------------------------------
+	apiRouter.use(function(req, res, next) {
+		// do logging
+		console.log('Somebody just came to our app!');
+
+	  // checking for a token
+	  var token = req.body.token || req.params.token || req.headers['x-access-token'];
+	  // decode token
+	  if (token) {
+
+	    // verifies secret and checks exp
+	    jwt.verify(token, secret, function(err, decoded) {
+
+	      if (err) {
+	        res.status(403).send({
+	        	success: false,
+	        	message: 'Failed to authenticate token.'
+	    	});
+	      } else {
+	        // if everything is good, save to request for use in other routes
+	        req.decoded = decoded;
+	        next(); // make sure we go to the next routes and don't stop here
+	      }
+	    });
+
+	  } else {
+
+	    // when the user has no token
+	    // return an HTTP response of 403 (access forbidden) and an error message
+   	 	res.status(403).send({
+   	 		success: false,
+   	 		message: 'No token provided.'
+   	 	});
+	  }
 	});
 
-	// on routes that end in /users
+    // ----------------------------------------------------
+	// USER ROUTES (/users)
+	// ----------------------------------------------------
+
+    // ROUTE ENDING IN /users/
 	// ----------------------------------------------------
 	apiRouter.route('/users')
 
-		// create a user (accessed at POST http://localhost:8080/users)
+		// create a user (POST /users)
 		.post(function(req, res) {
-            console.log('okay here');
 
 			var user = new User();		// create a new instance of the User model
 			user.username = req.body.username;  // set the users username (comes from the request)
@@ -95,7 +136,7 @@ module.exports = function(app, express) {
 			});
 		})
 
-		// get all the users (accessed at GET http://localhost:8080/api/users)
+		// get all the users (GET /users)
 		.get(function(req, res) {
 
 			User.find({}, function(err, users) {
@@ -106,11 +147,11 @@ module.exports = function(app, express) {
 			});
 		});
 
-	// on routes that end in /users/:user_id
+	// ROUTE ENDING IN /users/:user_id
 	// ----------------------------------------------------
 	apiRouter.route('/users/:user_id')
 
-		// get the user with that id
+		// get the user with that id (GET /users/:user_id)
 		.get(function(req, res) {
 			User.findById(req.params.user_id, function(err, user) {
 				if (err) res.send(err);
@@ -156,13 +197,17 @@ module.exports = function(app, express) {
 			});
 		});
 
-    // on routes that end in /users/:user_id
-	// ----------------------------------------------------
+    // ---------------------------------------------
+	// REQUEST ROUTES (/request)
+	// ---------------------------------------------
+
+    //ROUTE ENDING IN '/requests'
+    //---------------------------
 	apiRouter.route('/requests')
-        //adds a new request to db
+        //adds a new request to db (POST /requests)
         .post(function(req, res) {
 			var request = new Request();		// create a new instance of the Request model
-			request.user = req.body.user;  // set what user is making the request
+			request.username = req.body.username;  // set what user is making the request
             request.wanted = req.body.wanted;  // set what class that the user wants
             request.requestTime = req.body.requestTime;  // set what time the request occurred
             request.trading = req.body.trading;  // set what classes the user is trading
@@ -170,25 +215,82 @@ module.exports = function(app, express) {
 
 			request.save(function(err) {
 				if (err) {
-					// duplicate entry
-					if (err.code == 11000)
-						return res.json({ success: false, message: 'A user with that username already exists. '});
-					else
-						return res.send(err);
+					return res.send(err);
 				}
-
 				// return a message
 				res.json({ message: 'Request Created!' });
 			});
 		})
 
-        //gets all of the requests in the db
+        //gets all of the requests in the db (GET /requests)
         .get(function(req, res) {
-			Request.find({}, function(err, requests) {
+            //gets all requests sorted by most recent
+			Request.find({}, null, {sort: {requestTime: -1}}, function(err, requests) {
 				if (err) res.send(err);
-
 				// return the requests
 				res.json(requests);
+			});
+		});
+
+    //ROUTE ENDING IN '/:username/requests'
+    //-------------------------------------
+    apiRouter.route('/:username/requests')
+
+        //gets all requests for a user (GET /:username/requests)
+        .get(function(req, res){
+            console.log(req.params.username);
+            Request.find({ username: req.params.username}, function(err, requests){
+                if(err) res.send(err);
+                //return the requests
+                res.json(requests);
+            });
+        });
+
+    //ROUTE ENDING IN '/requests/request_id'
+    //--------------------------------------
+    apiRouter.route('/requests/:request_id')
+
+        //get the request associated with id (GET /requests/:request_id)
+        .get(function(req, res){
+            Request.findById(req.params.request_id, function(err, request){
+                if(err) res.send(err);
+                //returns the request
+                res.json(request);
+            });
+        })
+
+        //delete the request with this id (DELETE /requests/:request_id)
+        .delete(function(req, res){
+            Request.remove({
+				_id: req.params.request_id
+			}, function(err, user) {
+				if (err) res.send(err);
+
+				res.json({ message: 'Successfully deleted' });
+			});
+        })
+
+        //updates the request with this id (PUT /requests/:request_id)
+        .put(function(req, res) {
+			Request.findById(req.params.request_id, function(err, request) {
+
+				if (err) res.send(err);
+
+				// set the new user information if it exists in the request
+				if (req.body.username) request.username = req.body.username;
+                if (req.body.wanted) request.wanted = req.body.wanted;
+				if (req.body.requestTime) request.requestTime = req.body.requestTime;
+				if (req.body.trading) request.trading = req.body.trading;
+                if (req.body.offering) request.offering = req.body.offering;
+
+				// save the user
+				request.save(function(err) {
+					if (err) res.send(err);
+
+					// return a message
+					res.json({ message: 'Request updated!' });
+				});
+
 			});
 		});
 

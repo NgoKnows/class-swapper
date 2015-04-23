@@ -1,0 +1,17 @@
+<div>
+        Username:
+        <input ng-model="user.userData.username" type="text" name="username">
+        <br> Password:
+        <input ng-model="user.userData.password" type="text" name="password">
+        <br> First Name:
+        <input ng-model="user.userData.firstName" type="text" name="firstName">
+        <br> Last Name:
+        <input ng-model="user.userData.lastName" type="text" name="lastName">
+        <br> Major:
+        <input ng-model="user.userData.major" type="text" name="major">
+        <br> Class:
+        <input ng-model="user.userData.class" type="text" name="class">
+        <br>
+        <button ng-click="user.saveUser()">Submit</button>
+        <span>{{ user.loginData.username }}</span>
+</div>

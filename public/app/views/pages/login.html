@@ -1,0 +1,10 @@
+<div>
+        YAAAAAAA First name:
+        <input ng-model="login.loginData.username" type="text" name="fname">
+        <br> Last name:
+        <input ng-model="login.loginData.password" type="text" name="lname">
+        <br>
+        <button ng-click="login.doLogin()">Submit</button>
+        <button ng-click="login.doLogout()">Log Out</button>
+        <span>{{ login.loginData.username }}</span>
+</div>
