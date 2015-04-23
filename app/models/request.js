@@ -5,9 +5,9 @@ var Schema       = mongoose.Schema;
 var RequestSchema   = new Schema({
     username: {type: String, required: true},
 	wanted: {type: String, required: true},
-	requestTime: {type: Date, required: true},
     trading: {type: [String]},
-    offering: {type: [String]}
+    offering: {type: [String]},
+    date: {type: Date, required: true, default: Date.now }
 });
 
 module.exports = mongoose.model('Request', RequestSchema);
