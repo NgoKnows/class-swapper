@@ -207,10 +207,11 @@ module.exports = function(app, express) {
         //adds a new request to db (POST /requests)
         .post(function(req, res) {
 			var request = new Request();		// create a new instance of the Request model
-			request.username = req.body.username;  // set what user is making the request
+			request.username = req.decoded.username;  // set what user is making the request
             request.wanted = req.body.wanted;  // set what class that the user wants
             request.trading = req.body.trading;  // set what classes the user is trading
             request.offering = req.body.offering;  // set what the user is offering for the class
+            console.log(req);
 
 			request.save(function(err) {
 				if (err) {
@@ -292,10 +293,10 @@ module.exports = function(app, express) {
 			});
 		});
 
-	// api endpoint to get user information
+    //ROUTE TO GET CURRENT USER INFO
+    //--------------------------------------
 	apiRouter.get('/me', function(req, res) {
 		res.send(req.decoded);
 	});
-
 	return apiRouter;
 };
