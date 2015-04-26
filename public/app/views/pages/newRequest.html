@@ -1,0 +1,13 @@
+<div>
+    <div>
+         Class Wanted:
+        <input ng-model="request.requestData.wanted" type="text">
+        <br> Trading:
+        <input ng-model="request.requestData.trading" type="text">
+        <br> Offering:
+        <input ng-model="request.requestData.offering" type="text">
+        <button ng-click="request.createRequest()">Submit {{main.user.username}}</button>
+        <div ng-if="request.message">{{request.message}}</div>
+</div>
+
+</div>
