@@ -1,6 +1,17 @@
 <div>
-        <div>
-            {{ main.userData }}
-        </div>
-        <div>dfajsdif</div>
+    <table class="striped">
+        <thead>
+            <tr>
+                <th ng-repeat="(cat, value) in home.requests[0]">{{cat}}</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="request in home.requests">
+                <td ng-repeat="(key, val) in request">{{key}} : {{val}}</td>
+                <td>
+                <button ng-click="home.deleteRequest(request._id)">Delete</button></td>
+            </tr>
+        </tbody>
+    </table>
+    <div><a href="newRequest">Make a new request!</a></div>
 </div>
