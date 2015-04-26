@@ -46,7 +46,6 @@ angular.module('authService', [])
 		if (AuthToken.getToken())
 			return $http.get('/api/me', { cache: true });
 		else
-            console.log("HI");
 			return $q.reject({ message: 'User has no token.' });
 	};
 
