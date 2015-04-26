@@ -1,7 +1,8 @@
 angular.module('userCtrl', ['userService'])
 
+//for testing only (remove after)
+//gets and shows all users and deletes
 .controller('userController', function(User) {
-
 	var vm = this;
 
 	// set a processing variable to show loading things
@@ -58,8 +59,8 @@ angular.module('userCtrl', ['userService'])
 	};
 })
 
-// controller applied to user edit page
-.controller('userEditController', function($routeParams, User) {
+//controller used when editing a user
+    .controller('userEditController', function($routeParams, User) {
 
 	var vm = this;
 
