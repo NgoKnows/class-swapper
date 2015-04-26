@@ -5,7 +5,6 @@ angular.module('mainCtrl', [])
 	var vm = this;
 	// get info if a person is logged in
 	vm.loggedIn = Auth.isLoggedIn();
-
 	// check to see if a user is logged in on every request
 	$rootScope.$on('$routeChangeStart', function() {
         $(".button-collapse").sideNav();
@@ -15,8 +14,6 @@ angular.module('mainCtrl', [])
 		Auth.getUser()
 			.then(function(data) {
 				vm.user = data.data;
-                console.log(data);
-                console.log(vm.user);
 			});
 	});
 
